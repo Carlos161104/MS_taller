@@ -1,0 +1,17 @@
+{
+  "name": "Getway",
+  "version": "1.0.0",
+  "description": "getway of microservices for an amazon lite proyect - API Getway",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.164",
+    "@types/jsonwebtoken": "^9.0.10",
+    "aws-lambda": "^1.0.7",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  }
+}
