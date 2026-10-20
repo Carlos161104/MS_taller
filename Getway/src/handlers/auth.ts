@@ -35,4 +35,6 @@ export const authorizer: APIGatewayTokenAuthorizerHandler = async (event) => {
     } catch (error) {
         throw new Error("Unauthorized");
     }
-}
+};
+
+export const handler = authorizer;
