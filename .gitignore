@@ -1,0 +1,20 @@
+# Dependencias de Node
+node_modules/
+**/node_modules/
+
+# Variables de entorno
+.env
+**/.env
+**/.env.*
+!**/.env.sample
+!**/.env.template
+
+# (Opcional) Archivos de build/serverless
+**/.serverless/
+**/.build/
+**/dist/
+
+# (Opcional) Logs
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*

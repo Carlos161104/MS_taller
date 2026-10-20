@@ -1,4 +1,4 @@
- # Archivo de configuración Serverless Framework para el servicio "gateway"
+# Archivo de configuración Serverless Framework para el servicio "gateway"
  # Cada sección tiene un comentario breve explicando su propósito.
 
  # Nombre del servicio gestionado por Serverless
@@ -63,7 +63,7 @@ functions:
 
   # Función autorizadora (si existe) para validar tokens/credenciales
   authorizer:
-    handler: src/handlers/auth.handler
+    handler: src/handlers/auth.authorizer
     name: ${self:provider.stage}-auth
 
 
