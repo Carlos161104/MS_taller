@@ -37,6 +37,7 @@ provider:
 functions: 
   register: 
     handler: src/handlers/register.register
+    name: ${self:provider.stage}-users-register
     events:
       - http:
           method: post
@@ -49,3 +50,47 @@ functions:
               - X-Api-Key
               - X-Amz-Date
               - X-Amz-Security-Token
+
+resources: 
+  Resources: 
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      name: ${self:provider.stage}-users-Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-users
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: email-index
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+    
+    refreshTokensTable:
+      Type: AWS::DynamoDB::Table
+      name: ${self:provider.stage}-JWTRefresh-Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-refresh-tokens
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: refreshTokenId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: refreshTokenId
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: true
+        
+        
