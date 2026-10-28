@@ -1,0 +1,51 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: canoja161104
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: users
+# Archivo de configuración Serverless Framework para el servicio "users"
+ # Cada sección tiene un comentario breve explicando su propósito.
+
+ # Nombre del servicio gestionado por Serverless
+service: users
+
+# Configuración del proveedor (AWS) y parámetros globales
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'develop'} # Stage por defecto (se puede pasar con --stage)
+  region: us-east-1
+
+  # Variables de entorno que estarán disponibles en las funciones Lambda
+  environment:
+    STAGE: ${self:provider.stage}
+    JWT_SECRET: ${ssm:/taller/${self:provider.stage}/JWT-SECRET} # secreto desde SSM
+    JWT_REFRESH_SECRET: ${ssm:/taller/${self:provider.stage}/JWT-REFRESH-SECRET} # secreto desde SSM
+    CORS_ORIGIN: ${file(./config/config-${self:provider.stage}.json):CORS_ORIGIN} # lectura desde archivo de configuración
+  apiGateway:
+    restApiId: !ImportValue MainRestApiId
+    restApiRootResourceId: !ImportValue MainRestApiRootResourceId
+
+  # Declaración de permisos IAM que tendrán las Lambdas (logs, etc.)
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: "*"
+  
+functions: 
+  register: 
+    handler: src/handlers/register.register
+    events:
+      - http:
+          method: post
+          path: /users/register
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
