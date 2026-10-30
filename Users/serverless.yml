@@ -39,6 +39,9 @@ provider:
         - dynamodb:Query
         - dynamodb:PutItem
       Resource:
+        - !GetAtt usersTable.Arn
+        - !Sub "${usersTable.Arn}/index/*"
+        - !GetAtt refreshTokensTable.Arn
         - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-${self:provider.stage}-users
         - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-${self:provider.stage}-users/index/*
 

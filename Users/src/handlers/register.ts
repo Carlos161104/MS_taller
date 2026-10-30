@@ -52,7 +52,7 @@ export async function register(event: APIGatewayProxyEvent): Promise<APIGatewayP
         } = user;
         return ok(userPublic);
     } catch (error) {
-
+        console.error('Error al registrar usuario:', error);
         return internalServerError('Error al registrar usuario' + (error instanceof Error ? `: ${error.message}` : ''));
     }
 
