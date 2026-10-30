@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { badRequest, ok } from "../lib/response";
+import { badRequest, internalServerError, ok } from "../lib/response";
 import { dynamoDBDocumentClient } from "../lib/dynamoDB";
 import bycript from "bcryptjs";
 import { v4 as uuidV4 } from "uuid";
@@ -34,7 +34,7 @@ export async function register(event: APIGatewayProxyEvent): Promise<APIGatewayP
         }
 
         const user: UserInterface = {
-            userID: uuidV4(),
+            userId: uuidV4(),
             email: email,
             password: passwordHashed,
             name,
@@ -53,7 +53,7 @@ export async function register(event: APIGatewayProxyEvent): Promise<APIGatewayP
         return ok(userPublic);
     } catch (error) {
 
-        return badRequest('Error al registrar usuario' + (error instanceof Error ? `: ${error.message}` : ''));
+        return internalServerError('Error al registrar usuario' + (error instanceof Error ? `: ${error.message}` : ''));
     }
 
 }

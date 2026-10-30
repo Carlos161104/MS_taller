@@ -17,3 +17,12 @@ export const badRequest = (message: string): APIGatewayProxyResult => ({
         message
     })
 })
+
+export const internalServerError = (message: string): APIGatewayProxyResult => ({
+    statusCode: 500,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})
