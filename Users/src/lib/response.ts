@@ -26,3 +26,12 @@ export const internalServerError = (message: string): APIGatewayProxyResult => (
         message
     })
 })
+
+export const unauthorized = (message: string): APIGatewayProxyResult => ({
+    statusCode: 401,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})

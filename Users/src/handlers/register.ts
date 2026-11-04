@@ -5,6 +5,7 @@ import { dynamoDBDocumentClient } from "../lib/dynamoDB";
 import bycript from "bcryptjs";
 import { v4 as uuidV4 } from "uuid";
 import { UserInterface } from "../lib/types/user";
+import { errorMessage, logsMessage } from "../lib/constants/message";
 
 const table = process.env.USERS_TABLE;
 
@@ -14,7 +15,7 @@ export async function register(event: APIGatewayProxyEvent): Promise<APIGatewayP
         const { email, password, name, role } = body;
 
         if (!email || !password || !name || !role) {
-            return badRequest('Faltan campos requeridos: email, password, name y role son obligatorios');
+            return badRequest(errorMessage.badPayload);
         }
 
         const existingUser = await dynamoDBDocumentClient.send(new QueryCommand({
@@ -30,7 +31,7 @@ export async function register(event: APIGatewayProxyEvent): Promise<APIGatewayP
         const now = new Date().toISOString();
 
         if (existingUser.Items && existingUser.Items.length > 0) {
-            return badRequest('El email ya está registrado');
+            return badRequest(errorMessage.userAlreadyExist);
         }
 
         const user: UserInterface = {
@@ -52,8 +53,8 @@ export async function register(event: APIGatewayProxyEvent): Promise<APIGatewayP
         } = user;
         return ok(userPublic);
     } catch (error) {
-        console.error('Error al registrar usuario:', error);
-        return internalServerError('Error al registrar usuario' + (error instanceof Error ? `: ${error.message}` : ''));
+        console.error(logsMessage.ErrorInLambda('register'), error);
+        return internalServerError(errorMessage.internalServer);
     }
 
 }

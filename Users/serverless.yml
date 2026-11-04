@@ -22,6 +22,7 @@ provider:
     JWT_REFRESH_SECRET: ${ssm:/taller/${self:provider.stage}/JWT-REFRESH-SECRET} # secreto desde SSM
     CORS_ORIGIN: ${file(./config/config-${self:provider.stage}.json):CORS_ORIGIN} # lectura desde archivo de configuración
     USERS_TABLE: !Ref usersTable # referencia a la tabla DynamoDB creada en resources
+    REFRESH_TOKENS_TABLE: !Ref refreshTokensTable # referencia a la tabla DynamoDB creada en resources
   apiGateway:
     restApiId: !ImportValue MainRestApiId
     restApiRootResourceId: !ImportValue MainRestApiRootResourceId
@@ -61,6 +62,21 @@ functions:
               - X-Api-Key
               - X-Amz-Date
               - X-Amz-Security-Token
+  login: 
+    handler: src/handlers/login.login
+    events:
+      - http:
+          method: post
+          path: /users/login
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+
 
 resources: 
   Resources: 
