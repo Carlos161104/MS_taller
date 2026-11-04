@@ -99,6 +99,25 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue MainAuthorizerId
+  
+  deleteProduct: 
+    handler: src/handlers/deleteProduct.deleteProduct
+    name: ${self:provider.stage}-products-deleteProduct
+    events:
+      - http:
+          method: delete
+          path: /products/{productId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date   
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
 
 resources: 
   Resources: 
