@@ -26,3 +26,30 @@ export const internalServerError = (message: string): APIGatewayProxyResult => (
         message
     })
 })
+
+export const unauthorized = (message: string): APIGatewayProxyResult => ({
+    statusCode: 401,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})
+
+export const notFound = (message: string): APIGatewayProxyResult => ({
+    statusCode: 404,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})
+
+export const forbidden = (message: string): APIGatewayProxyResult => ({
+    statusCode: 403,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})
