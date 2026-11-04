@@ -93,6 +93,40 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue MainAuthorizerId
+  updateUser: 
+    handler: src/handlers/updateUser.updateUser
+    events:
+      - http:
+          method: put
+          path: /users/{id}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+  deleteUser: 
+    handler: src/handlers/deleteUser.deleteUser
+    events:
+      - http:
+          method: delete
+          path: /users/{id}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token  
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
 
 
 resources: 

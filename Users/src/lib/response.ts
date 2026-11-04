@@ -44,3 +44,12 @@ export const notFound = (message: string): APIGatewayProxyResult => ({
         message
     })
 })
+
+export const forbidden = (message: string): APIGatewayProxyResult => ({
+    statusCode: 403,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})

@@ -4,6 +4,7 @@ export const errorMessage = {
     internalServer: 'Error interno del servidor',
     badCredentials: 'Las credenciales son incorrectas',
     userNotFound: 'Usuario no encontrado',
+    forbbiden: 'No tiene permisos para realizar esta acción',
 }
 
 export const logsMessage = {
