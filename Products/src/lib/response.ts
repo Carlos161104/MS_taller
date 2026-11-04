@@ -53,3 +53,12 @@ export const forbidden = (message: string): APIGatewayProxyResult => ({
         message
     })
 })
+
+export const create = (data: unknown): APIGatewayProxyResult => ({
+    statusCode: 201,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: true,
+        data
+    })
+})

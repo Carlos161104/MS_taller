@@ -46,7 +46,24 @@ provider:
         - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-${self:provider.stage}-products/index/*
 
 functions: 
-  
+  createProduct: 
+    handler: src/handlers/createProduct.createProduct
+    name: ${self:provider.stage}-products-createProduct
+    events:
+      - http:
+          method: post
+          path: /products/create
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !ImportValue MainCognitoAuthorizerId
 
 resources: 
   Resources: 
