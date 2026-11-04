@@ -5,6 +5,7 @@ export const errorMessage = {
     badCredentials: 'Las credenciales son incorrectas',
     userNotFound: 'Usuario no encontrado',
     forbbiden: 'No tiene permisos para realizar esta acción',
+    productNotFound: 'Producto no encontrado',
 }
 
 export const logsMessage = {

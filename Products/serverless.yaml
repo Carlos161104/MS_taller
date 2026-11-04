@@ -62,8 +62,24 @@ functions:
               - X-Amz-Date
               - X-Amz-Security-Token
           authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId: !ImportValue MainCognitoAuthorizerId
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
+  getProduct: 
+    handler: src/handlers/getProduct.getProduct
+    name: ${self:provider.stage}-products-getProduct
+    events:
+      - http:
+          method: get
+          path: /products/{productId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
 
 resources: 
   Resources: 
