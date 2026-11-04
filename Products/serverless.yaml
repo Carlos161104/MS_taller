@@ -81,6 +81,25 @@ functions:
               - X-Amz-Date
               - X-Amz-Security-Token
 
+  updateProduct: 
+    handler: src/handlers/updateProduct.updateProduct
+    name: ${self:provider.stage}-products-updateProduct
+    events:
+      - http:
+          method: put
+          path: /products/{productId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
 resources: 
   Resources: 
     productsTable:
@@ -103,5 +122,5 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-    
+
 
