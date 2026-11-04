@@ -3,7 +3,7 @@ import { loginDto } from "../lib/dtos/login.dto";
 import { badRequest, internalServerError, ok, unauthorized } from "../lib/response";
 import { errorMessage, logsMessage } from "../lib/constants/message";
 import { dynamoDBDocumentClient } from "../lib/dynamoDB";
-import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import bycript from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../lib/jwt";
 
@@ -12,8 +12,11 @@ const refreshTokensTable = process.env.REFRESH_TOKENS_TABLE;
 
 export async function login(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
     try {
-        const body: loginDto = JSON.parse(event.body || '{ }');
-        if (!body.password || !body.email) {
+        const body = JSON.parse(event.body || "{}") as Partial<loginDto>;
+        const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+        const password = typeof body.password === "string" ? body.password : "";
+
+        if (!email || !password) {
             return badRequest(errorMessage.badPayload);
         }
 
@@ -22,38 +25,37 @@ export async function login(event: APIGatewayProxyEvent): Promise<APIGatewayProx
             IndexName: "email-index",
             KeyConditionExpression: "email = :email",
             ExpressionAttributeValues: {
-                ":email": body.email
+                ":email": email
             }
         }));
 
-        if (!result.Items || result.Items.length === 0) {
+        const user = result.Items?.[0];
+        if (!user || !user.password) {
             return unauthorized(errorMessage.badCredentials);
         }
 
-        const user = result.Items[0];
-        const validPwd = await bycript.compare(body.password, user.password);
-
-        if (!validPwd) {
+        const passwordIsValid = await bycript.compare(password, user.password);
+        if (!passwordIsValid) {
             return unauthorized(errorMessage.badCredentials);
         }
 
-        const paylod = {
+        const payload = {
             userId: user.userId,
             email: user.email,
             name: user.name,
             role: user.role
-        }
+        };
 
-        const accessToken = generateAccessToken(paylod);
-        const refreshToken = generateRefreshToken(paylod);
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
 
-        const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days in seconds
+        const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
 
         await dynamoDBDocumentClient.send(new PutCommand({
             TableName: refreshTokensTable,
             Item: {
                 token: refreshToken,
-                userId: paylod.userId,
+                userId: payload.userId,
                 expiresAt
             }
         }));
@@ -64,8 +66,11 @@ export async function login(event: APIGatewayProxyEvent): Promise<APIGatewayProx
         });
 
     } catch (error) {
+        if (error instanceof SyntaxError) {
+            return badRequest(errorMessage.badPayload);
+        }
+
         console.log(logsMessage.ErrorInLambda('login'), error);
         return internalServerError(errorMessage.internalServer);
     }
-
-} 
+}
