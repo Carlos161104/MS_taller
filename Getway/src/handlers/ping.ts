@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export async function ping(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    console.log('Actualizando la getway');
     console.log('pong', JSON.stringify(event));
     return {
         statusCode: 200,

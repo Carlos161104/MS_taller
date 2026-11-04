@@ -2,7 +2,8 @@ export const errorMessage = {
     badPayload: 'Alguno de los campos obligatorios no esta presente',
     userAlreadyExist: 'El usuario ya ha sido registrado',
     internalServer: 'Error interno del servidor',
-    badCredentials: 'Las credenciales son incorrectas'
+    badCredentials: 'Las credenciales son incorrectas',
+    userNotFound: 'Usuario no encontrado',
 }
 
 export const logsMessage = {

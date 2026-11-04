@@ -35,3 +35,12 @@ export const unauthorized = (message: string): APIGatewayProxyResult => ({
         message
     })
 })
+
+export const notFound = (message: string): APIGatewayProxyResult => ({
+    statusCode: 404,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+        success: false,
+        message
+    })
+})
