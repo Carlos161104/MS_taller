@@ -118,6 +118,57 @@ functions:
           authorizer:
             type: CUSTOM
             authorizerId: !ImportValue MainAuthorizerId
+  listProducts: 
+    handler: src/handlers/listProducts.listProducts
+    name: ${self:provider.stage}-products-listProducts
+    events:
+      - http:
+          method: get
+          path: /products
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+  
+  listProductsBySeller: 
+    handler: src/handlers/listProductsBySeller.listProductsBySeller
+    name: ${self:provider.stage}-products-listProductsBySeller
+    events:
+      - http:
+          method: get
+          path: /products/seller/{sellerId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token  
+  
+  updateStock: 
+    handler: src/handlers/updateStock.updateStock
+    name: ${self:provider.stage}-products-updateStock
+    events:
+      - http:
+          method: patch
+          path: /products/{productId}/stock
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          atthorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
 
 resources: 
   Resources: 
