@@ -1,0 +1,196 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: canoja161104
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: users
+# Archivo de configuración Serverless Framework para el servicio "users"
+ # Cada sección tiene un comentario breve explicando su propósito.
+
+ # Nombre del servicio gestionado por Serverless
+service: products
+
+# Configuración del proveedor (AWS) y parámetros globales
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'develop'} # Stage por defecto (se puede pasar con --stage)
+  region: us-east-1
+
+  # Variables de entorno que estarán disponibles en las funciones Lambda
+  environment:
+    STAGE: ${self:provider.stage}
+    CORS_ORIGIN: ${file(./config/config-${self:provider.stage}.json):CORS_ORIGIN} # lectura desde archivo de configuración
+    PRODUCTS_TABLE: !Ref productsTable # referencia a la tabla DynamoDB creada en resources
+  apiGateway:
+    restApiId: !ImportValue MainRestApiId
+    restApiRootResourceId: !ImportValue MainRestApiRootResourceId
+
+  # Declaración de permisos IAM que tendrán las Lambdas (logs, etc.)
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:PutItem
+        - dynamodb:Scan
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - !GetAtt productsTable.Arn
+        - !Sub "${productsTable.Arn}/index/*"
+        - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-${self:provider.stage}-products
+        - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:service}-${self:provider.stage}-products/index/*
+
+functions: 
+  createProduct: 
+    handler: src/handlers/createProduct.createProduct
+    name: ${self:provider.stage}-products-createProduct
+    events:
+      - http:
+          method: post
+          path: /products/create
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
+  getProduct: 
+    handler: src/handlers/getProduct.getProduct
+    name: ${self:provider.stage}-products-getProduct
+    events:
+      - http:
+          method: get
+          path: /products/{productId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+
+  updateProduct: 
+    handler: src/handlers/updateProduct.updateProduct
+    name: ${self:provider.stage}-products-updateProduct
+    events:
+      - http:
+          method: put
+          path: /products/{productId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+  
+  deleteProduct: 
+    handler: src/handlers/deleteProduct.deleteProduct
+    name: ${self:provider.stage}-products-deleteProduct
+    events:
+      - http:
+          method: delete
+          path: /products/{productId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date   
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+  listProducts: 
+    handler: src/handlers/listProducts.listProducts
+    name: ${self:provider.stage}-products-listProducts
+    events:
+      - http:
+          method: get
+          path: /products
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+  
+  listProductsBySeller: 
+    handler: src/handlers/listProductsBySeller.listProductsBySeller
+    name: ${self:provider.stage}-products-listProductsBySeller
+    events:
+      - http:
+          method: get
+          path: /products/seller/{sellerId}
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token  
+  
+  updateStock: 
+    handler: src/handlers/updateStock.updateStock
+    name: ${self:provider.stage}-products-updateStock
+    events:
+      - http:
+          method: patch
+          path: /products/{productId}/stock
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          atthorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
+
+resources: 
+  Resources: 
+    productsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-products
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: productId
+            AttributeType: S
+          - AttributeName: sellerId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: seller-index
+            KeySchema:
+              - AttributeName: sellerId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+
