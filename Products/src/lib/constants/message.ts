@@ -6,6 +6,7 @@ export const errorMessage = {
     userNotFound: 'Usuario no encontrado',
     forbbiden: 'No tiene permisos para realizar esta acción',
     productNotFound: 'Producto no encontrado',
+    invalidQuantity: 'La cantidad ingresada no es valida'
 }
 
 export const logsMessage = {
