@@ -1,21 +1,30 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { internalServerError, ok } from "../lib/response";
-import { errorMessage } from "../lib/constants/message";
+import { errorMessage, logsMessage } from "../lib/constants/message";
 import { dynamoDBDocumentClient } from "../lib/dynamoDB";
 
-const products = process.env.PRODUCTS_TABLE;
+const products = process.env.PRODUCTS_TABLE || "";
 
-export async function listProducts(event : APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function listProducts(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
     try {
-        const result = await dynamoDBDocumentClient.send({
-            TableName: products,
-            Limit: 100
-        });
+        let allProducts: any[] = [];
+        let lastEvaluatedKey: Record<string, any> | undefined;
 
+        do {
+            const result = await dynamoDBDocumentClient.send(new ScanCommand({
+                TableName: products,
+                ...(lastEvaluatedKey ? { ExclusiveStartKey: lastEvaluatedKey } : {}),
+                Limit: 100
+            }));
 
-        return ok(result.Items);
-    }catch (error) {
-        console.error("Error in listProducts lambda", error);
+            allProducts = [...allProducts, ...(result.Items ?? [])];
+            lastEvaluatedKey = result.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
+
+        return ok(allProducts);
+    } catch (error) {
+        console.error(logsMessage.ErrorInLambda('listProducts'), error);
         return internalServerError(errorMessage.internalServer);
-    }   
-} 
+    }
+}
